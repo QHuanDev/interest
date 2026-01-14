@@ -1,21 +1,23 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Package, Plus, RefreshCw, ServerOff } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
-import { Product, ProductInput, DashboardStats } from './types';
-import { productService } from './services/productService';
-import { StatsCard } from './components/StatsCard';
-import { ProductForm } from './components/ProductForm';
-import { ProductTable } from './components/ProductTable';
+import React, { useEffect, useState, useMemo } from "react";
+import { Calculator, Package, Plus, RefreshCw, ServerOff } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
+import { Product, ProductInput, DashboardStats } from "./types";
+import { productService } from "./services/productService";
+import { StatsCard } from "./components/StatsCard";
+import { ProductForm } from "./components/ProductForm";
+import { ProductTable } from "./components/ProductTable";
+import { SimpleCalculator } from "./components/SimpleCalculator";
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
 
   // Fetch products
   const fetchProducts = async () => {
@@ -27,9 +29,11 @@ const App: React.FC = () => {
         setProducts(response.data);
       }
     } catch (error) {
-      console.error('API connection error:', error);
+      console.error("API connection error:", error);
       setIsError(true);
-      setErrorMessage('Không thể kết nối đến máy chủ (localhost:5000). Vui lòng đảm bảo Backend đang chạy.');
+      setErrorMessage(
+        "Không thể kết nối đến máy chủ (localhost:5000). Vui lòng đảm bảo Backend đang chạy."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -63,39 +67,39 @@ const App: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
-    
-    const toastId = toast.loading('Đang xóa...');
+    if (!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
+
+    const toastId = toast.loading("Đang xóa...");
     try {
       await productService.delete(id);
       setProducts((prev) => prev.filter((p) => p._id !== id));
-      toast.success('Đã xóa sản phẩm', { id: toastId });
+      toast.success("Đã xóa sản phẩm", { id: toastId });
     } catch (error) {
-      toast.error('Xóa thất bại', { id: toastId });
+      toast.error("Xóa thất bại", { id: toastId });
     }
   };
 
   const handleSubmit = async (data: ProductInput) => {
     setIsSubmitting(true);
-    const toastId = toast.loading('Đang xử lý...');
+    const toastId = toast.loading("Đang xử lý...");
     try {
       if (editingProduct) {
         // Edit mode
         const res = await productService.update(editingProduct._id, data);
         if (res.success) {
-          await fetchProducts(); 
-          toast.success('Cập nhật thành công', { id: toastId });
+          await fetchProducts();
+          toast.success("Cập nhật thành công", { id: toastId });
         }
       } else {
         // Create mode
         const res = await productService.create(data);
         if (res.success) {
-           await fetchProducts();
-           toast.success('Thêm mới thành công', { id: toastId });
+          await fetchProducts();
+          toast.success("Thêm mới thành công", { id: toastId });
         }
       }
     } catch (err: any) {
-      toast.error(err.message || 'Có lỗi xảy ra', { id: toastId });
+      toast.error(err.message || "Có lỗi xảy ra", { id: toastId });
       throw err; // Re-throw to let ProductForm know it failed
     } finally {
       setIsSubmitting(false);
@@ -104,24 +108,24 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-24 md:pb-20">
-      <Toaster 
+      <Toaster
         position="top-center"
         toastOptions={{
           style: {
-            background: '#1e293b',
-            color: '#fff',
-            border: '1px solid #334155',
+            background: "#1e293b",
+            color: "#fff",
+            border: "1px solid #334155",
           },
           success: {
             iconTheme: {
-              primary: '#10b981',
-              secondary: '#fff',
+              primary: "#10b981",
+              secondary: "#fff",
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+              primary: "#ef4444",
+              secondary: "#fff",
             },
           },
         }}
@@ -133,23 +137,37 @@ const App: React.FC = () => {
             <div className="bg-primary/20 p-2 rounded-lg">
               <Package className="text-primary w-6 h-6" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-white">ProfitFlow <span className="text-slate-500 font-normal">Manager</span></h1>
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              ProfitFlow{" "}
+              <span className="text-slate-500 font-normal">Manager</span>
+            </h1>
           </div>
-          <button 
-            onClick={() => {
-              fetchProducts();
-              toast.success('Đã làm mới dữ liệu');
-            }} 
-            className="p-2 text-slate-400 hover:text-white transition-colors"
-            title="Tải lại dữ liệu"
-          >
-            <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsCalculatorOpen(true)}
+              className="p-2 text-slate-400 hover:text-white transition-colors hover:bg-slate-700/50 rounded-lg"
+              title="Mở máy tính"
+            >
+              <Calculator size={20} />
+            </button>
+            <button
+              onClick={() => {
+                fetchProducts();
+                toast.success("Đã làm mới dữ liệu");
+              }}
+              className="p-2 text-slate-400 hover:text-white transition-colors hover:bg-slate-700/50 rounded-lg"
+              title="Tải lại dữ liệu"
+            >
+              <RefreshCw
+                size={20}
+                className={isLoading ? "animate-spin" : ""}
+              />
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
         {/* Error State */}
         {isError && (
           <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-6 flex items-center gap-4 text-rose-500">
@@ -158,7 +176,7 @@ const App: React.FC = () => {
               <h3 className="font-bold text-lg">Lỗi Kết Nối</h3>
               <p className="text-rose-400/80">{errorMessage}</p>
             </div>
-            <button 
+            <button
               onClick={fetchProducts}
               className="ml-auto px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
             >
@@ -169,16 +187,28 @@ const App: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatsCard title="Tổng Doanh Thu" value={stats.totalRevenue} type="revenue" />
+          <StatsCard
+            title="Tổng Doanh Thu"
+            value={stats.totalRevenue}
+            type="revenue"
+          />
           <StatsCard title="Tổng Chi Phí" value={stats.totalCost} type="cost" />
-          <StatsCard title="Tổng Lợi Nhuận" value={stats.totalProfit} type="profit" />
+          <StatsCard
+            title="Tổng Lợi Nhuận"
+            value={stats.totalProfit}
+            type="profit"
+          />
         </div>
 
         {/* Action Bar (Hidden on mobile, showing FAB instead) */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Danh Sách Sản Phẩm</h2>
-            <p className="text-slate-400 text-sm mt-1">Quản lý nhập xuất và theo dõi hiệu quả kinh doanh</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Danh Sách Sản Phẩm
+            </h2>
+            <p className="text-slate-400 text-sm mt-1">
+              Quản lý nhập xuất và theo dõi hiệu quả kinh doanh
+            </p>
           </div>
           <button
             onClick={handleOpenCreate}
@@ -191,14 +221,14 @@ const App: React.FC = () => {
 
         {/* Content Table */}
         {isLoading && !isError ? (
-           <div className="flex justify-center py-20">
-             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-           </div>
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
         ) : (
-          <ProductTable 
-            products={products} 
-            onEdit={handleOpenEdit} 
-            onDelete={handleDelete} 
+          <ProductTable
+            products={products}
+            onEdit={handleOpenEdit}
+            onDelete={handleDelete}
           />
         )}
       </main>
@@ -219,6 +249,12 @@ const App: React.FC = () => {
         onSubmit={handleSubmit}
         initialData={editingProduct}
         isSubmitting={isSubmitting}
+      />
+
+      {/* Calculator Modal */}
+      <SimpleCalculator
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
       />
     </div>
   );
