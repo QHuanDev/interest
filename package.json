@@ -1,0 +1,21 @@
+{
+  "name": "interest",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix BE && npm install --prefix FE && npm run build --prefix FE",
+    "start": "npm run start --prefix BE"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/QHuanDev/interest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/QHuanDev/interest/issues"
+  },
+  "homepage": "https://github.com/QHuanDev/interest#readme",
+  "description": ""
+}

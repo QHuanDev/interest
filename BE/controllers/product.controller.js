@@ -1,7 +1,7 @@
-const Product = require("../models/Product");
+import Product from "../models/Product.js";
 
 // Lấy tất cả sản phẩm
-exports.getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
     res.json({
@@ -19,7 +19,7 @@ exports.getAllProducts = async (req, res) => {
 };
 
 // Tạo sản phẩm mới
-exports.createProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   try {
     const { name, importPrice, sellPrice, importQuantity, soldQuantity } =
       req.body;
@@ -67,7 +67,7 @@ exports.createProduct = async (req, res) => {
 };
 
 // Cập nhật sản phẩm
-exports.updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, importPrice, sellPrice, importQuantity, soldQuantity } =
@@ -121,7 +121,7 @@ exports.updateProduct = async (req, res) => {
 };
 
 // Xóa sản phẩm
-exports.deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findByIdAndDelete(id);
