@@ -44,14 +44,16 @@ const App: React.FC = () => {
   }, []);
 
   // Compute dashboard stats
-  const stats = useMemo<DashboardStats>(() => {
+  const stats = useMemo(() => {
     return products.reduce(
       (acc, product) => ({
         totalRevenue: acc.totalRevenue + product.revenue,
         totalCost: acc.totalCost + product.cost,
         totalProfit: acc.totalProfit + product.profit,
+        totalImportCost:
+          acc.totalImportCost + product.importPrice * product.importQuantity,
       }),
-      { totalRevenue: 0, totalCost: 0, totalProfit: 0 }
+      { totalRevenue: 0, totalCost: 0, totalProfit: 0, totalImportCost: 0 }
     );
   }, [products]);
 
@@ -186,11 +188,16 @@ const App: React.FC = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <StatsCard
             title="Tổng Doanh Thu"
             value={stats.totalRevenue}
             type="revenue"
+          />
+          <StatsCard
+            title="Tổng CP Nhập"
+            value={stats.totalImportCost}
+            type="importCost"
           />
           <StatsCard title="Tổng Chi Phí" value={stats.totalCost} type="cost" />
           <StatsCard
