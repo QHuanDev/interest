@@ -7,6 +7,11 @@ const productSchema = new mongoose.Schema(
       required: [true, "Vui lòng nhập tên sản phẩm"],
       trim: true,
     },
+    type: {
+      type: String,
+      enum: ["product", "material"],
+      default: "product",
+    },
     importPrice: {
       type: Number,
       required: [true, "Vui lòng nhập giá nhập"],

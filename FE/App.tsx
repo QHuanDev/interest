@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Calculator, Package, Plus, RefreshCw, ServerOff } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import { Product, ProductInput, DashboardStats } from "./types";
+import { Product, ProductInput } from "./types";
 import { productService } from "./services/productService";
 import { StatsCard } from "./components/StatsCard";
 import { ProductForm } from "./components/ProductForm";
 import { ProductTable } from "./components/ProductTable";
+import { MaterialTable } from "./components/MaterialTable";
 import { SimpleCalculator } from "./components/SimpleCalculator";
 
 const App: React.FC = () => {
@@ -56,6 +57,16 @@ const App: React.FC = () => {
       { totalRevenue: 0, totalCost: 0, totalProfit: 0, totalImportCost: 0 }
     );
   }, [products]);
+
+  // Separate products by type
+  const productItems = useMemo(
+    () => products.filter((p) => p.type === "product"),
+    [products]
+  );
+  const materialItems = useMemo(
+    () => products.filter((p) => p.type === "material"),
+    [products]
+  );
 
   // Handlers
   const handleOpenCreate = () => {
@@ -222,21 +233,47 @@ const App: React.FC = () => {
             className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-blue-600 text-white font-medium rounded-lg shadow-lg shadow-blue-500/25 transition-all active:scale-95"
           >
             <Plus size={20} />
-            Thêm Sản Phẩm
+            Thêm mới
           </button>
         </div>
 
-        {/* Content Table */}
+        {/* Content */}
         {isLoading && !isError ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : (
-          <ProductTable
-            products={products}
-            onEdit={handleOpenEdit}
-            onDelete={handleDelete}
-          />
+          <div className="space-y-8">
+            {/* Bảng Sản phẩm */}
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
+                  <span className="w-3 h-3 bg-emerald-500 rounded-full"></span>
+                  Sản phẩm ({productItems.length})
+                </h3>
+              </div>
+              <ProductTable
+                products={productItems}
+                onEdit={handleOpenEdit}
+                onDelete={handleDelete}
+              />
+            </section>
+
+            {/* Bảng Vật tư */}
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-lg font-bold text-orange-400 flex items-center gap-2">
+                  <span className="w-3 h-3 bg-orange-500 rounded-full"></span>
+                  Vật tư ({materialItems.length})
+                </h3>
+              </div>
+              <MaterialTable
+                products={materialItems}
+                onEdit={handleOpenEdit}
+                onDelete={handleDelete}
+              />
+            </section>
+          </div>
         )}
       </main>
 

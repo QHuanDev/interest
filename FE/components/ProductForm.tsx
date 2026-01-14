@@ -13,6 +13,7 @@ interface ProductFormProps {
 
 const initialFormState: ProductInput = {
   name: "",
+  type: "product",
   importPrice: 0,
   sellPrice: 0,
   importQuantity: 0,
@@ -33,6 +34,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     if (initialData) {
       setFormData({
         name: initialData.name,
+        type: initialData.type || "product",
         importPrice: initialData.importPrice,
         sellPrice: initialData.sellPrice,
         importQuantity: initialData.importQuantity,
@@ -45,10 +47,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   }, [initialData, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "name" ? value : Number(value),
+      [name]: name === "name" || type === "radio" ? value : Number(value),
     }));
   };
 
@@ -86,6 +88,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   if (!isOpen) return null;
 
   const isLossWarning =
+    formData.type === "product" &&
     formData.sellPrice > 0 &&
     formData.importPrice > 0 &&
     formData.sellPrice < formData.importPrice;
@@ -131,23 +134,54 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Giá nhập (VNĐ)
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Loại
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="type"
+                  value="product"
+                  checked={formData.type === "product"}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-primary focus:ring-primary"
+                />
+                <span className="text-white">Sản phẩm</span>
               </label>
-              <input
-                type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                name="importPrice"
-                required
-                min="0"
-                value={formData.importPrice}
-                onChange={handleChange}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 sm:py-2 text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-              />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="type"
+                  value="material"
+                  checked={formData.type === "material"}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-primary focus:ring-primary"
+                />
+                <span className="text-white">Vật tư</span>
+              </label>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1">
+              Giá nhập (VNĐ)
+            </label>
+            <input
+              type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              name="importPrice"
+              required
+              min="0"
+              value={formData.importPrice}
+              onChange={handleChange}
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 sm:py-2 text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          {formData.type === "product" && (
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">
                 Giá bán (VNĐ)
@@ -174,7 +208,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </p>
               )}
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>

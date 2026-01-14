@@ -21,7 +21,7 @@ export const getAllProducts = async (req, res) => {
 // Tạo sản phẩm mới
 export const createProduct = async (req, res) => {
   try {
-    const { name, importPrice, sellPrice, importQuantity, soldQuantity } =
+    const { name, type, importPrice, sellPrice, importQuantity, soldQuantity } =
       req.body;
 
     // Validate số lượng bán <= số lượng nhập
@@ -34,6 +34,7 @@ export const createProduct = async (req, res) => {
 
     const product = await Product.create({
       name,
+      type: type || "product",
       importPrice,
       sellPrice,
       importQuantity,
@@ -70,7 +71,7 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, importPrice, sellPrice, importQuantity, soldQuantity } =
+    const { name, type, importPrice, sellPrice, importQuantity, soldQuantity } =
       req.body;
 
     // Validate số lượng bán <= số lượng nhập
@@ -83,7 +84,7 @@ export const updateProduct = async (req, res) => {
 
     const product = await Product.findByIdAndUpdate(
       id,
-      { name, importPrice, sellPrice, importQuantity, soldQuantity },
+      { name, type, importPrice, sellPrice, importQuantity, soldQuantity },
       { new: true, runValidators: true }
     );
 

@@ -1,6 +1,9 @@
+export type ProductType = "product" | "material";
+
 export interface Product {
   _id: string;
   name: string;
+  type: ProductType;
   importPrice: number;
   sellPrice: number;
   importQuantity: number;
@@ -14,6 +17,7 @@ export interface Product {
 
 export interface ProductInput {
   name: string;
+  type: ProductType;
   importPrice: number;
   sellPrice: number;
   importQuantity: number;

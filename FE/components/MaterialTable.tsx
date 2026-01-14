@@ -1,34 +1,23 @@
 import React from "react";
 import { Product } from "../types";
 import { formatCurrency } from "../utils";
-import {
-  Edit2,
-  Trash2,
-  AlertCircle,
-  ArrowDown,
-  ArrowUp,
-  Package,
-  TrendingUp,
-  Wrench,
-} from "lucide-react";
+import { Edit2, Trash2, Wrench } from "lucide-react";
 
-interface ProductTableProps {
+interface MaterialTableProps {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
 }
 
-export const ProductTable: React.FC<ProductTableProps> = ({
+export const MaterialTable: React.FC<MaterialTableProps> = ({
   products,
   onEdit,
   onDelete,
 }) => {
   if (products.length === 0) {
     return (
-      <div className="text-center py-20 bg-surface rounded-xl border border-slate-700">
-        <p className="text-slate-400">
-          Chưa có sản phẩm nào. Hãy thêm sản phẩm mới.
-        </p>
+      <div className="text-center py-12 bg-surface rounded-xl border border-slate-700">
+        <p className="text-slate-400">Chưa có vật tư nào.</p>
       </div>
     );
   }
@@ -38,7 +27,6 @@ export const ProductTable: React.FC<ProductTableProps> = ({
       {/* Mobile View: Cards */}
       <div className="md:hidden space-y-4">
         {products.map((product) => {
-          const isWarningPrice = product.sellPrice < product.importPrice;
           const inventory = product.importQuantity - product.soldQuantity;
 
           return (
@@ -49,58 +37,16 @@ export const ProductTable: React.FC<ProductTableProps> = ({
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 bg-orange-500/20 text-orange-400">
+                      <Wrench size={12} />
+                      VT
+                    </span>
                     {product.name}
-                    {isWarningPrice && (
-                      <span
-                        className="text-amber-500"
-                        title="Giá bán thấp hơn giá nhập"
-                      >
-                        <AlertCircle size={16} />
-                      </span>
-                    )}
                   </h3>
-                  <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 ${
-                        product.type === "product"
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-orange-500/20 text-orange-400"
-                      }`}
-                    >
-                      {product.type === "product" ? (
-                        <Package size={12} />
-                      ) : (
-                        <Wrench size={12} />
-                      )}
-                      {product.type === "product" ? "SP" : "VT"}
-                    </span>
-                    <span className="bg-slate-700 px-2 py-0.5 rounded text-slate-300">
-                      Kho: {inventory}
-                    </span>
-                    <span>•</span>
-                    <span>Đã bán: {product.soldQuantity}</span>
-                  </div>
-                </div>
-                <div
-                  className={`text-right font-bold ${
-                    product.isLoss ? "text-rose-500" : "text-emerald-500"
-                  }`}
-                >
-                  <div className="flex items-center justify-end gap-1">
-                    {product.isLoss ? (
-                      <ArrowDown size={16} />
-                    ) : (
-                      <ArrowUp size={16} />
-                    )}
-                    {formatCurrency(product.profit)}
-                  </div>
-                  <p className="text-[10px] text-slate-500 font-normal uppercase mt-0.5">
-                    Lợi nhuận
-                  </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 text-sm text-slate-300 mb-4 bg-slate-900/50 p-3 rounded-lg">
+              <div className="grid grid-cols-3 gap-2 text-sm text-slate-300 mb-4 bg-slate-900/50 p-3 rounded-lg">
                 <div className="flex flex-col">
                   <span className="text-xs text-slate-500">Giá nhập</span>
                   <span>{formatCurrency(product.importPrice)}</span>
@@ -113,18 +59,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                     )}
                   </span>
                 </div>
-                <div className="flex flex-col text-center">
-                  <span className="text-xs text-slate-500">Giá Tồn Kho</span>
-                  <span className="text-purple-400">
-                    {formatCurrency(inventory * product.importPrice)}
-                  </span>
-                </div>
                 <div className="flex flex-col text-right">
-                  <span className="text-xs text-slate-500">Giá bán</span>
-                  <span
-                    className={isWarningPrice ? "text-amber-500" : "text-white"}
-                  >
-                    {formatCurrency(product.sellPrice)}
+                  <span className="text-xs text-slate-500">Tồn kho</span>
+                  <span className="text-purple-400">
+                    {inventory} / {product.importQuantity}
                   </span>
                 </div>
               </div>
@@ -153,21 +91,16 @@ export const ProductTable: React.FC<ProductTableProps> = ({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-800/50 text-slate-400 text-sm uppercase tracking-wider border-b border-slate-700">
-              <th className="p-4 font-semibold">Tên Sản Phẩm</th>
+              <th className="p-4 font-semibold">Tên Vật Tư</th>
               <th className="p-4 font-semibold text-right">Giá Nhập</th>
               <th className="p-4 font-semibold text-right">Tổng CP Nhập</th>
-              <th className="p-4 font-semibold text-right">Giá Bán</th>
               <th className="p-4 font-semibold text-center">Tồn Kho</th>
               <th className="p-4 font-semibold text-right">Tổng Giá Tồn</th>
-              <th className="p-4 font-semibold text-center">Đã Bán</th>
-              <th className="p-4 font-semibold text-right">Doanh Thu</th>
-              <th className="p-4 font-semibold text-right">Lãi/Lỗ</th>
               <th className="p-4 font-semibold text-center">Thao Tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700">
             {products.map((product) => {
-              const isWarningPrice = product.sellPrice < product.importPrice;
               const inventory = product.importQuantity - product.soldQuantity;
 
               return (
@@ -177,29 +110,11 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                 >
                   <td className="p-4 font-medium text-white">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 ${
-                          product.type === "product"
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-orange-500/20 text-orange-400"
-                        }`}
-                      >
-                        {product.type === "product" ? (
-                          <Package size={12} />
-                        ) : (
-                          <Wrench size={12} />
-                        )}
-                        {product.type === "product" ? "SP" : "VT"}
+                      <span className="px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 bg-orange-500/20 text-orange-400">
+                        <Wrench size={12} />
+                        VT
                       </span>
                       {product.name}
-                      {isWarningPrice && (
-                        <span
-                          className="text-amber-500 tooltip"
-                          title="Giá bán thấp hơn giá nhập"
-                        >
-                          <AlertCircle size={16} />
-                        </span>
-                      )}
                     </div>
                   </td>
                   <td className="p-4 text-right text-slate-300">
@@ -210,13 +125,6 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                       product.importPrice * product.importQuantity
                     )}
                   </td>
-                  <td
-                    className={`p-4 text-right font-medium ${
-                      isWarningPrice ? "text-amber-500" : "text-slate-300"
-                    }`}
-                  >
-                    {formatCurrency(product.sellPrice)}
-                  </td>
                   <td className="p-4 text-center">
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-300">
                       {inventory} / {product.importQuantity}
@@ -224,26 +132,6 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                   </td>
                   <td className="p-4 text-right text-purple-400 font-medium">
                     {formatCurrency(inventory * product.importPrice)}
-                  </td>
-                  <td className="p-4 text-center text-slate-300">
-                    {product.soldQuantity}
-                  </td>
-                  <td className="p-4 text-right text-blue-400">
-                    {formatCurrency(product.revenue)}
-                  </td>
-                  <td className="p-4 text-right font-bold">
-                    <div
-                      className={`flex items-center justify-end gap-1 ${
-                        product.isLoss ? "text-rose-500" : "text-emerald-500"
-                      }`}
-                    >
-                      {product.isLoss ? (
-                        <ArrowDown size={14} />
-                      ) : (
-                        <ArrowUp size={14} />
-                      )}
-                      {formatCurrency(product.profit)}
-                    </div>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
