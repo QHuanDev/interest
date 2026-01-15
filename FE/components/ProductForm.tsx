@@ -78,7 +78,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
     try {
       await onSubmit(formData);
-      onClose();
+      // Không gọi onClose() ở đây - để parent component quản lý
     } catch (err) {
       console.error(err);
       setError("Có lỗi xảy ra khi lưu sản phẩm.");

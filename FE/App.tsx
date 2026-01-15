@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Calculator, Package, Plus, RefreshCw, ServerOff } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import { Product, ProductInput } from "./types";
+import { Product, ProductInput, ProductUpdateInput } from "./types";
 import { productService } from "./services/productService";
 import { StatsCard } from "./components/StatsCard";
 import { ProductForm } from "./components/ProductForm";
 import { ProductTable } from "./components/ProductTable";
 import { MaterialTable } from "./components/MaterialTable";
 import { SimpleCalculator } from "./components/SimpleCalculator";
+import { HistoryModal } from "./components/HistoryModal";
+import { NoteInputModal } from "./components/NoteInputModal";
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,6 +21,15 @@ const App: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
+
+  // History modal state
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+
+  // Note input modal state (for update)
+  const [pendingUpdateData, setPendingUpdateData] =
+    useState<ProductInput | null>(null);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState<boolean>(false);
 
   // Fetch products
   const fetchProducts = async () => {
@@ -93,30 +104,55 @@ const App: React.FC = () => {
   };
 
   const handleSubmit = async (data: ProductInput) => {
-    setIsSubmitting(true);
-    const toastId = toast.loading("Đang xử lý...");
-    try {
-      if (editingProduct) {
-        // Edit mode
-        const res = await productService.update(editingProduct._id, data);
-        if (res.success) {
-          await fetchProducts();
-          toast.success("Cập nhật thành công", { id: toastId });
-        }
-      } else {
-        // Create mode
+    if (editingProduct) {
+      // Edit mode: show note input modal first
+      setPendingUpdateData(data);
+      setIsNoteModalOpen(true);
+    } else {
+      // Create mode: direct submit
+      setIsSubmitting(true);
+      const toastId = toast.loading("Đang xử lý...");
+      try {
         const res = await productService.create(data);
         if (res.success) {
           await fetchProducts();
           toast.success("Thêm mới thành công", { id: toastId });
+          setIsModalOpen(false);
         }
+      } catch (err: any) {
+        toast.error(err.message || "Có lỗi xảy ra", { id: toastId });
+        throw err;
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleNoteConfirm = async (note: string) => {
+    if (!pendingUpdateData || !editingProduct) return;
+
+    setIsSubmitting(true);
+    const toastId = toast.loading("Đang cập nhật...");
+    try {
+      const updateData: ProductUpdateInput = { ...pendingUpdateData, note };
+      const res = await productService.update(editingProduct._id, updateData);
+      if (res.success) {
+        await fetchProducts();
+        toast.success("Cập nhật thành công", { id: toastId });
+        setIsModalOpen(false);
+        setIsNoteModalOpen(false);
+        setPendingUpdateData(null);
       }
     } catch (err: any) {
       toast.error(err.message || "Có lỗi xảy ra", { id: toastId });
-      throw err; // Re-throw to let ProductForm know it failed
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleViewHistory = (product: Product) => {
+    setHistoryProduct(product);
+    setIsHistoryOpen(true);
   };
 
   return (
@@ -256,6 +292,7 @@ const App: React.FC = () => {
                 products={productItems}
                 onEdit={handleOpenEdit}
                 onDelete={handleDelete}
+                onViewHistory={handleViewHistory}
               />
             </section>
 
@@ -271,6 +308,7 @@ const App: React.FC = () => {
                 products={materialItems}
                 onEdit={handleOpenEdit}
                 onDelete={handleDelete}
+                onViewHistory={handleViewHistory}
               />
             </section>
           </div>
@@ -299,6 +337,26 @@ const App: React.FC = () => {
       <SimpleCalculator
         isOpen={isCalculatorOpen}
         onClose={() => setIsCalculatorOpen(false)}
+      />
+
+      {/* History Modal */}
+      <HistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        productId={historyProduct?._id || ""}
+        productName={historyProduct?.name || ""}
+      />
+
+      {/* Note Input Modal */}
+      <NoteInputModal
+        isOpen={isNoteModalOpen}
+        onClose={() => {
+          setIsNoteModalOpen(false);
+          setPendingUpdateData(null);
+        }}
+        onConfirm={handleNoteConfirm}
+        title="Ghi chú cập nhật"
+        isSubmitting={isSubmitting}
       />
     </div>
   );

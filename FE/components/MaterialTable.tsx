@@ -1,18 +1,20 @@
 import React from "react";
 import { Product } from "../types";
 import { formatCurrency } from "../utils";
-import { Edit2, Trash2, Wrench } from "lucide-react";
+import { Edit2, Trash2, Wrench, History } from "lucide-react";
 
 interface MaterialTableProps {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
+  onViewHistory: (product: Product) => void;
 }
 
 export const MaterialTable: React.FC<MaterialTableProps> = ({
   products,
   onEdit,
   onDelete,
+  onViewHistory,
 }) => {
   if (products.length === 0) {
     return (
@@ -68,6 +70,12 @@ export const MaterialTable: React.FC<MaterialTableProps> = ({
               </div>
 
               <div className="flex gap-3">
+                <button
+                  onClick={() => onViewHistory(product)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-purple-500/10 text-purple-500 font-medium hover:bg-purple-500 hover:text-white transition-colors"
+                >
+                  <History size={16} /> Lịch sử
+                </button>
                 <button
                   onClick={() => onEdit(product)}
                   className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-blue-500/10 text-blue-500 font-medium hover:bg-blue-500 hover:text-white transition-colors"
@@ -135,6 +143,13 @@ export const MaterialTable: React.FC<MaterialTableProps> = ({
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => onViewHistory(product)}
+                        className="p-2 rounded-lg bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all"
+                        title="Lịch sử"
+                      >
+                        <History size={16} />
+                      </button>
                       <button
                         onClick={() => onEdit(product)}
                         className="p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
